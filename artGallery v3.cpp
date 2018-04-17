@@ -30,7 +30,7 @@
 #define PI 3.14159
 using namespace std;
 
-static unsigned int texture[2]; // Array of texture indices.
+static unsigned int texture[10]; // Array of texture indices.
 static unsigned char chessboard[64][64][3]; // Storage for chessboard image.
 
 static GLUquadricObj *qobj; // Create a pointer to a quadric object.
@@ -105,11 +105,13 @@ BitMapFile *getBMPData(string filename)
 void loadExternalTextures()
 {
 	// Local storage for bmp image data.
-	BitMapFile *image[2];
+	BitMapFile *image[10];
 
 	// Load the texture.
 	image[0] = getBMPData("Textures/Road.bmp");
 	image[1] = getBMPData("Textures/bmo.bmp");
+	image[2] = getBMPData("Textures/photo_butterflies.bmp");
+	//image[3] = getBMPData("Textures/photo_butterflies.bmp");
 
 	// Bind road image to texture index[0]
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
@@ -128,6 +130,24 @@ void loadExternalTextures()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[1]->sizeX, image[1]->sizeY, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, image[1]->data);
+
+	// Bind photo_butterflies image to texture index[2]
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[2]->sizeX, image[2]->sizeY, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, image[2]->data);
+
+	// Bind  image to texture index[3]
+	glBindTexture(GL_TEXTURE_2D, texture[3]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[3]->sizeX, image[3]->sizeY, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, image[3]->data);
 }
 
 // Routine to load a program-generated image as a texture. 
@@ -200,12 +220,12 @@ void setup(void)
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
 
 	// Create texture index array.
-	glGenTextures(2, texture);
+	glGenTextures(3, texture);
 
 	// Load external texture and generate and load procedural texture.
 	loadExternalTextures();
 	createChessboard();
-	loadProceduralTextures();
+	//loadProceduralTextures();
 
 	// Specify how texture values combine with current surface color values.
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -300,7 +320,7 @@ void drawGround() {
 	glFlush();
 }
 
-void drawFLoor() {
+void drawFloor() {
 	// Turn on OpenGL texturing.
 	glEnable(GL_TEXTURE_2D);
 
@@ -336,7 +356,7 @@ void drawRoad() {
 	glDisable(GL_TEXTURE_2D);
 }
 
-void drawWalls() {
+void drawPhotographyExhibitWalls() {
 	float matAmbAndDif1[] = { 0.20, 0.50, 1.00, 1.0 }; // blue
 	float matAmbAndDif4[] = { 1.00, 0.30, 0.70, 1.0 }; // pink
 	float matAmbAndDif5[] = { 1.00, 0.39, 0.39, 1.0 }; // orange
@@ -369,7 +389,7 @@ void drawWalls() {
 
 	//back wall
 	glPushMatrix();
-	glTranslatef(0.0, -3.0, 110.0);
+	glTranslatef(0.0, -3.0, 150.0);
 	glScalef(47.0, 20.0, 1.0);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
 	glutSolidCube(2.0);
@@ -423,7 +443,7 @@ void drawWalls() {
 	glPushMatrix();
 	glTranslatef(46.0, -3.0, 99.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
-	glScalef(12.0, 20.0, 1.0);
+	glScalef(50.0, 20.0, 1.0);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
 	//glColor3f(0.65, 0.50, 0.39);
 	glutSolidCube(2.0);
@@ -439,6 +459,80 @@ void drawWalls() {
 	//glColor3f(0.65, 0.50, 0.39);
 	glutSolidCube(2.0);
 	glPopMatrix();
+}
+
+void drawPaintingExhibitWalls() {
+	float matAmbAndDif6[] = { 0.87, 0.58, 0.98, 1.0 }; // purple
+
+	//left wall
+	glPushMatrix();
+	glTranslatef(-46.0, -3.0, 180.0);
+	glRotatef(90.0, 0.0, 1.0, 0.0);
+	glScalef(30.0, 20.0, 1.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
+	glutSolidCube(2.0);
+	glPopMatrix();
+
+	//adjacent to left wall
+	glPushMatrix();
+	glTranslatef(-92.0, -3.0, 210.0);
+	glScalef(47.0, 20.0, 1.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
+	glutSolidCube(2.0);
+	glPopMatrix();
+
+	//right wall
+	glPushMatrix();
+	glTranslatef(-92.0, -3.0, 110.0);
+	glScalef(47.0, 20.0, 1.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
+	glutSolidCube(2.0);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-138.0, -3.0, 180.0);
+	glRotatef(90.0, 0.0, 1.0, 0.0);
+	glScalef(30.0, 20.0, 1.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
+	glutSolidCube(2.0);
+	glPopMatrix();
+
+
+}
+
+void addPhotographs() {
+	// Turn on OpenGL texturing.
+	glEnable(GL_TEXTURE_2D);
+
+	//glRotatef(90.0, 0.0, 1.0, 0.0);
+
+	// Activate a texture.
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	
+	// (0.0, -3.0, 150.0) back wall coordinates
+	// Map the texture onto a square polygon.
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-5.0, -5.0, 148.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(10.0, -5.0, 148.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(10.0, 10.0, 148.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-5.0, 10.0, 148.0);
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+
+
+	glEnable(GL_TEXTURE_2D);
+	//glRotatef(90.0, 0.0, 1.0, 0.0);
+	glBindTexture(GL_TEXTURE_2D, texture[3]);
+	// (0.0, -3.0, 150.0) back wall coordinates
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f(5.0, -5.0, 148.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(10.0, -5.0, 148.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(10.0, 10.0, 148.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(5.0, 10.0, 148.0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
 }
 
 void drawAll() {
@@ -459,9 +553,11 @@ void drawAll() {
 	glEnable(GL_LIGHTING);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
 
-	drawWalls();
+	drawPhotographyExhibitWalls();
+	drawPaintingExhibitWalls();
 	drawGround();
-	drawFLoor();
+	drawFloor();
+	addPhotographs();
 	//drawRoof();
 	drawRoad();
 	drawSun();
