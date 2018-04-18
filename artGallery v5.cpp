@@ -120,7 +120,7 @@ void loadExternalTextures()
 
 	// Load the texture.
 	image[0] = getBMPData("Textures/Road.bmp");
-	image[1] = getBMPData("Textures/bmo.bmp");
+	image[1] = getBMPData("Textures/photo_car.bmp");
 	image[2] = getBMPData("Textures/photo_butterflies.bmp");
 	image[3] = getBMPData("Textures/photo_friends.bmp");
 	image[4] = getBMPData("Textures/photo_flowerShop.bmp");
@@ -169,24 +169,6 @@ void loadExternalTextures()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[4]->sizeX, image[4]->sizeY, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, image[4]->data);
-}
-
-// Routine to load a program-generated image as a texture. 
-void loadProceduralTextures()
-{
-	// Activate texture index texture[1]. 
-	glBindTexture(GL_TEXTURE_2D, texture[2]);
-
-	// Set texture parameters for wrapping.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Set texture parameters for filtering.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	// Specify an image as the texture to be bound with the currently active texture index.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, chessboard);
 }
 
 // Create 64 x 64 RGB image of a chessboard.
@@ -246,7 +228,6 @@ void setup(void)
 	// Load external texture and generate and load procedural texture.
 	loadExternalTextures();
 	createChessboard();
-	//loadProceduralTextures();
 
 	// Specify how texture values combine with current surface color values.
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
