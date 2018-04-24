@@ -44,6 +44,8 @@ static float turnsize = 10.0; //degrees to turn
 static float pointOfView = 0.0;
 static float spotExponent = 2.0;
 
+static int doorOpen = 0;
+
 static int isSelecting = 0; // In selection mode?
 static int hits; // Number of entries in hit buffer.
 static unsigned int buffer[1024]; // Hit buffer.
@@ -119,11 +121,11 @@ void loadExternalTextures()
 	BitMapFile *image[10];
 
 	// Load the texture.
-	image[0] = getBMPData("Textures/Road.bmp");
-	image[1] = getBMPData("Textures/photo_car.bmp");
-	image[2] = getBMPData("Textures/photo_butterflies.bmp");
-	image[3] = getBMPData("Textures/photo_friends.bmp");
-	image[4] = getBMPData("Textures/photo_flowerShop.bmp");
+	image[0] = getBMPData("fmustafaTEXTURES/Road.bmp");
+	image[1] = getBMPData("fmustafaTEXTURES/floor.bmp");
+	image[2] = getBMPData("fmustafaTEXTURES/photo_butterflies.bmp");
+	image[3] = getBMPData("fmustafaTEXTURES/photo_friends.bmp");
+	image[4] = getBMPData("fmustafaTEXTURES/photo_flowerShop.bmp");
 
 	// Bind road image to texture index[0]
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
@@ -270,15 +272,32 @@ void resize(int w, int h)
 
 void addAllText() {
 	glColor3f(1.0, 0.3, 0.7);
-
 }
 
 void drawRoof() {
 	float matAmbAndDif1[] = { 1.0, 1.0, 1.0, 1.0 };
 
 	glPushMatrix();
-	glTranslatef(0.0, 20.0, 80.0);
-	glScalef(45.0, 0.5, 29.0);
+	glTranslatef(-1.0, 17.0, 100.0);
+	glScalef(48.0, 0.5, 50.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+	glutSolidCube(2.0);
+	glPushMatrix();
+
+	/*glPushMatrix();
+	glTranslatef(-92.0, 17.0, 160.0);
+	glScalef(45.0, 0.5, 50.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+	glutSolidCube(2.0);
+	glPushMatrix();*/
+}
+
+void drawRoof2() {
+	float matAmbAndDif1[] = { 1.0, 1.0, 1.0, 1.0 };
+
+	glPushMatrix();
+	glTranslatef(-92.0, 17.0, 160.0);
+	glScalef(45.0, 0.5, 50.0);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
 	glutSolidCube(2.0);
 	glPushMatrix();
@@ -331,10 +350,24 @@ void drawFloor() {
 
 	// Map the texture onto a square polygon.
 	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-50.0, -22.5, 50.0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(50.0, -22.5, 50.0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(50.0, -22.5, 110.0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-50.0, -22.5, 110.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-47.0, -22.5, 50.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(47.0, -22.5, 50.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(47.0, -22.5, 110.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-47.0, -22.5, 110.0);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-47.0, -22.5, 110.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(47.0, -22.5, 110.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(47.0, -22.5, 150.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-47.0, -22.5, 150.0);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-138.0, -22.5, 110.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(-45.0, -22.5, 110.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(-45.0, -22.5, 210.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-138.0, -22.5, 210.0);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
@@ -491,14 +524,14 @@ void drawPaintingExhibitWalls() {
 	glutSolidCube(2.0);
 	glPopMatrix();
 
+	//opposite wall
 	glPushMatrix();
-	glTranslatef(-138.0, -3.0, 180.0);
+	glTranslatef(-138.0, -3.0, 160.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
-	glScalef(30.0, 20.0, 1.0);
+	glScalef(49.0, 20.0, 1.0);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
 	glutSolidCube(2.0);
 	glPopMatrix();
-
 
 }
 
@@ -544,6 +577,58 @@ void addPhotographs() {
 	glDisable(GL_TEXTURE_2D);
 }
 
+void addSculpture() {
+	// Turn on OpenGL texturing.
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	gluQuadricTexture(qobj, GL_TRUE);
+	glPushMatrix();
+	glTranslatef(-90.0, 3.0, 125.0);
+	glRotatef(90.0, 1.0, 0.0, 0.0);
+	//gluSphere(qobj, 10.0, 20, 20);
+	gluCylinder(qobj, 5.0, 5.0, 20.0, 20.0, 20.0);
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+}
+
+void drawDoor() {
+	glMatrixMode(GL_MODELVIEW);
+
+	float matAmbAndDif2[] = { 0.36, 0.20, 0.09, 1.0 };
+	float matAmbAndDif3[] = { 0.81, 0.71, 0.23, 1.0 };
+
+	//door
+	glPushMatrix();
+
+	if (doorOpen) {
+		glTranslatef(5.0, -6.0, 45.0);
+		glRotatef(90.0, 0.0, 1.0, 0.0);
+	}
+	else
+		glTranslatef(0.0, -6.0, 50.0); //closed door
+	glScalef(5.0, 17.0, 1.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif2);
+	//glColor3f(0.86, 0.58, 0.44);
+	glutSolidCube(2.0);
+	glPopMatrix();
+
+	//doorknob
+	glPushMatrix();
+	if (doorOpen)
+	{
+		glTranslatef(5.0, -10.0, 45.0);
+		glRotatef(90.0, 0.0, 1.0, 0.0);
+	}
+	else
+		glTranslatef(-3.0, -10.0, 50.0);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif3);
+	//glColor3f(0.81, 0.71, 0.23);
+	glutSolidSphere(2.0, 20.0, 20.0);
+	glPopMatrix();
+}
+
 void drawAll() {
 
 	float matShine[] = { 50.0 };
@@ -562,12 +647,18 @@ void drawAll() {
 	glEnable(GL_LIGHTING);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
 
+	if (isSelecting) glLoadName(1);
+	drawDoor();
+
+	if (isSelecting) glLoadName(0);
 	drawPhotographyExhibitWalls();
 	drawPaintingExhibitWalls();
 	drawGround();
 	drawFloor();
 	addPhotographs();
-	//drawRoof();
+	addSculpture();
+	drawRoof();
+	//drawRoof2();
 	drawRoad();
 	drawSun();
 }
@@ -584,7 +675,7 @@ void mousePickFunction(int button, int state, int x, int y)
 		glSelectBuffer(1024, buffer); // Specify buffer to write hit records in selection mode
 		(void)glRenderMode(GL_SELECT); // Enter selection mode.
 
-									   // Save the viewing volume defined in the resize routine.
+		// Save the viewing volume defined in the resize routine.
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 
@@ -599,19 +690,17 @@ void mousePickFunction(int button, int state, int x, int y)
 		glInitNames(); // Initializes the name stack to empty.
 		glPushName(0); // Puts name 0 on top of stack.
 
-					   // Determine hits by calling drawBallAndTorus() so that names are assigned.
+		// Determine hits by calling drawBallAndTorus() so that names are assigned.
 		isSelecting = 1;
 		drawAll();
 
 		hits = glRenderMode(GL_RENDER); // Return to rendering mode, returning number of hits.
 
-										// Determine closest of the hit objects (if any).
+		// Determine closest of the hit objects (if any).
 		findClosestHit(hits, buffer);
-		if (closestName == 1) { 
-
+		if (closestName == 1) { //door
+			doorOpen = !doorOpen;
 		}
-
-
 
 		cout << "closest hit = " << closestName << endl;
 
@@ -644,10 +733,14 @@ void keyInput(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
+		case ' ':
+			doorOpen = !doorOpen;
+			glutPostRedisplay();
+			break;
 		case '0':
 			overhead = !overhead;
 			glutPostRedisplay();
-		break;
+			break;
 		case 27:
 			exit(0);
 			break;
