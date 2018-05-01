@@ -122,6 +122,7 @@ void loadExternalTextures()
 	image[5] = getBMPData("fmustafaTEXTURES/sky.bmp");
 	image[6] = getBMPData("fmustafaTEXTURES/starry_night.bmp");
 	image[7] = getBMPData("fmustafaTEXTURES/totoro_starry_night.bmp");
+	image[8] = getBMPData("fmustafaTEXTURES/concrete.bmp");
 
 	// Bind road image to texture index[0]
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
@@ -194,6 +195,15 @@ void loadExternalTextures()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[7]->sizeX, image[7]->sizeY, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, image[7]->data);
+
+	// Bind grass image to texture index[8]
+	glBindTexture(GL_TEXTURE_2D, texture[8]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[8]->sizeX, image[8]->sizeY, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, image[8]->data);
 
 }
 
@@ -315,29 +325,20 @@ void drawSun() {
 	glPopMatrix();
 }
 
+
+
 void drawGround() {
-	int i;
-	float z;
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture[8]);
+	glBegin(GL_POLYGON);
+	glNormal3f(0.0, 1.0, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-150.0, -23.5, 0.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(150.0, -23.5, 0.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(150.0, -23.5, 200.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-150.0, -23.5, 200.0);
+	glEnd();
 
-	// Draw floor as a stack of triangle strips.
-	i = 0;
-	for (z = 200.0; z > 0.0; z -= 5.0)
-	{
-		glBegin(GL_TRIANGLE_STRIP);
-		for (float x = -150.0; x < 150.0; x += 5.0)
-		{
-			if (i % 2) glColor4f(0.0, 0.5, 0.5, 1.0);
-			else glColor4f(1.0, 1.0, 1.0, 1.0);
-			glNormal3f(0.0, 1.0, 0.0);
-			glVertex3f(x, -23.5, z - 5.0);
-			glVertex3f(x, -23.5, z);
-			i++;
-		}
-		glEnd();
-		i++;
-	}
-
-	glFlush();
+	glDisable(GL_TEXTURE_2D);
 }
 
 void drawFloor() {
