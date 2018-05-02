@@ -8,11 +8,20 @@
 *
 * Environment/Compiler:  Visual Studio 2015
 *
-* Date:  April 28th, 2018
+* Date:  May 1st, 2018
 *
 * References:  none
 *
 * Interactions:
+Press the up arrow to move up.
+Press the left arrow to rotate left.
+Press the right arrow to rotate right.
+Press the down arrow to step back.
+Click on the door to open it.
+Or Press the space bar to open the door.
+Press r to toggle roof.
+Press 0 (zero) to get an overhead view.
+
 
 ******************************************************************************/
 
@@ -48,6 +57,13 @@ static float d = 1.0; // Intensity of sun light.
 static float theta = 45.0; // Angle of the sun with the ground.
 
 static int doorOpen = 0;
+static int roofEnable = 1;
+
+static int isFog = 0; // Is fog on?
+static int fogMode = GL_LINEAR; // Fog mode.
+static float fogDensity = 0.01; // Fog density.
+static float fogStart = 0.0; // Fog start z value.
+static float fogEnd = 100.0; // Fog end z value.
 
 static int isSelecting = 0; // In selection mode?
 static int hits; // Number of entries in hit buffer.
@@ -114,15 +130,16 @@ void loadExternalTextures()
 	BitMapFile *image[10];
 
 	// Load the texture.
-	image[0] = getBMPData("fmustafaTEXTURES/Road.bmp");
-	image[1] = getBMPData("fmustafaTEXTURES/floor.bmp");
+	image[0] = getBMPData("fmustafaTEXTURES/Road.bmp"); //Source: Google Images
+	image[1] = getBMPData("fmustafaTEXTURES/floor.bmp"); //Source: Google Images
 	image[2] = getBMPData("fmustafaTEXTURES/photo_butterflies.bmp");
 	image[3] = getBMPData("fmustafaTEXTURES/photo_friends.bmp");
-	image[4] = getBMPData("fmustafaTEXTURES/photo_flowerShop.bmp");
-	image[5] = getBMPData("fmustafaTEXTURES/sky.bmp");
-	image[6] = getBMPData("fmustafaTEXTURES/starry_night.bmp");
-	image[7] = getBMPData("fmustafaTEXTURES/totoro_starry_night.bmp");
-	image[8] = getBMPData("fmustafaTEXTURES/concrete.bmp");
+	image[4] = getBMPData("fmustafaTEXTURES/photo_waterfall.bmp");
+	image[5] = getBMPData("fmustafaTEXTURES/flowerPainting.bmp"); //Source: Google Images
+	image[6] = getBMPData("fmustafaTEXTURES/mountainPainting.bmp"); //Source: Google Images
+	image[7] = getBMPData("fmustafaTEXTURES/totoro_starry_night.bmp"); //Source: Google Images
+	image[8] = getBMPData("fmustafaTEXTURES/concrete.bmp"); //Source: Google Images
+	image[9] = getBMPData("fmustafaTEXTURES/sculpture.bmp"); //Source: Google Images
 
 	// Bind road image to texture index[0]
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
@@ -169,7 +186,7 @@ void loadExternalTextures()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[4]->sizeX, image[4]->sizeY, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, image[4]->data);
 
-	// Bind sky image to texture index[5]
+	// Bind flowerPainting image to texture index[5]
 	glBindTexture(GL_TEXTURE_2D, texture[5]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -204,6 +221,15 @@ void loadExternalTextures()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[8]->sizeX, image[8]->sizeY, 0,
 		GL_RGB, GL_UNSIGNED_BYTE, image[8]->data);
+
+	// Bind sculpture image to texture index[9]
+	glBindTexture(GL_TEXTURE_2D, texture[9]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image[9]->sizeX, image[9]->sizeY, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, image[9]->data);
 
 }
 
@@ -250,8 +276,6 @@ void setup(void)
 
 	// Create the new quadric object.
 	qobj = gluNewQuadric();
-
-
 }
 
 // Process hit buffer to find record with smallest min-z value.
@@ -294,23 +318,13 @@ void drawRoof() {
 	float matAmbAndDif1[] = { 1.0, 1.0, 1.0, 1.0 };
 
 	glPushMatrix();
-	glTranslatef(-1.0, 17.0, 100.0);
-	glScalef(48.0, 0.5, 50.0);
+	glTranslatef(-48.0, 17.0, 130.0);
+	glScalef(95.0, 0.5, 80.0);
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
 	glutSolidCube(2.0);
 	glPushMatrix();
 }
 
-void drawRoof2() {
-	float matAmbAndDif1[] = { 1.0, 1.0, 1.0, 1.0 };
-
-	glPushMatrix();
-	glTranslatef(-92.0, 17.0, 160.0);
-	glScalef(45.0, 0.5, 50.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
-	glutSolidCube(2.0);
-	glPushMatrix();
-}
 
 void drawSun() {
 	float lightPos0[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -320,12 +334,11 @@ void drawSun() {
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
 	glTranslatef(70.0, 30.0, 80.0);
 	//glTranslatef(20.0, 5.0, 80.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+	//glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, matAmbAndDif1);
 	glutSolidSphere(4.0, 20.0, 20.0);
 	glPopMatrix();
 }
-
-
 
 void drawGround() {
 	glEnable(GL_TEXTURE_2D);
@@ -337,7 +350,6 @@ void drawGround() {
 	glTexCoord2f(1.0, 1.0); glVertex3f(150.0, -23.5, 200.0);
 	glTexCoord2f(0.0, 1.0); glVertex3f(-150.0, -23.5, 200.0);
 	glEnd();
-
 	glDisable(GL_TEXTURE_2D);
 }
 
@@ -368,50 +380,6 @@ void drawFloor() {
 	glTexCoord2f(1.0, 0.0); glVertex3f(-45.0, -22.5, 110.0);
 	glTexCoord2f(1.0, 1.0); glVertex3f(-45.0, -22.5, 210.0);
 	glTexCoord2f(0.0, 1.0); glVertex3f(-138.0, -22.5, 210.0);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-}
-
-void drawSky() {
-
-	// Turn on OpenGL texturing.
-	glEnable(GL_TEXTURE_2D);
-	// Map the sky texture onto a rectangle parallel to the xy-plane.
-	glBindTexture(GL_TEXTURE_2D, texture[5]);
-	/*glBegin(GL_POLYGON);
-	glNormal3f(0.0, 1.0, 0.0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-160.0, 18.0, 90.0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(160.0, 18.0, 90.0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(160.0, 150.0, 90.0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-160.0, 150.0, 90.0);
-	glEnd();*/
-
-	glBindTexture(GL_TEXTURE_2D, texture[5]);
-	glBegin(GL_POLYGON);
-	glNormal3f(0.0, 1.0, 0.0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-160.0, -10.0, 90.0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(160.0, 18.0, 90.0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(160.0, 150.0, 90.0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-160.0, 150.0, 90.0);
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-}
-
-void drawRoad() {
-	// Turn on OpenGL texturing.
-	glEnable(GL_TEXTURE_2D);
-
-	// Activate a texture.
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-	// Map the texture onto a square polygon.
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f(-60.0, -22.5, 5.0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(60.0, -22.5, 5.0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(60.0, -22.5, 25.0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(-60.0, -22.5, 25.0);
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
@@ -452,7 +420,7 @@ void drawPhotographyExhibitWalls() {
 	glPushMatrix();
 	glTranslatef(0.0, -3.0, 150.0);
 	glScalef(47.0, 20.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	glutSolidCube(2.0);
 	glPopMatrix();
 
@@ -461,7 +429,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, -3.0, 61.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(12.0, 20.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	glutSolidCube(2.0);
 	glPopMatrix();
 
@@ -470,7 +438,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, 2.5, 73.0);
 	//glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(0.3, 0.3, 0.8);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	gluCylinder(qobj, 1, 1, 25, 15, 5);
 	glPopMatrix();
 
@@ -478,7 +446,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, 12.9, 80.0);
 	glRotatef(90.0, 1.0, 0.0, 0.0);
 	glScalef(0.3, 0.3, 0.8);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	gluCylinder(qobj, 1, 1, 25, 15, 5);
 	glPopMatrix();
 
@@ -486,7 +454,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, 15, 79.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(8.0, 2.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	glutSolidCube(2.0);
 	glPopMatrix();
 
@@ -494,7 +462,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, -14, 79.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(8.0, 9.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	glutSolidCube(2.0);
 	glPopMatrix();
 
@@ -505,7 +473,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(46.0, -3.0, 99.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(50.0, 20.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif5);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	//glColor3f(0.65, 0.50, 0.39);
 	glutSolidCube(2.0);
 	glPopMatrix();
@@ -516,7 +484,7 @@ void drawPhotographyExhibitWalls() {
 	glTranslatef(-46.0, -3.0, 80.0);
 	glRotatef(90.0, 0.0, 1.0, 0.0);
 	glScalef(30.0, 20.0, 1.0);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif6);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif4);
 	//glColor3f(0.65, 0.50, 0.39);
 	glutSolidCube(2.0);
 	glPopMatrix();
@@ -590,14 +558,12 @@ void addPhotographs() {
 
 	//(46.0, 2.5, 60 - 75) left wall coordinates
 	glEnable(GL_TEXTURE_2D);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	//gluBuild2DMipmaps(GL_TEXTURE_2D, 2, 5, 10, GL_RGB, GL_UNSIGNED_BYTE, 0);
 	glBindTexture(GL_TEXTURE_2D, texture[4]);
 	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f(44.0, -5.0, 65.0);
-	glTexCoord2f(1.0, 0.0); glVertex3f(44.0, -5.0, 70.0);
-	glTexCoord2f(1.0, 1.0); glVertex3f(44.0, 15.0, 70.0);
-	glTexCoord2f(0.0, 1.0); glVertex3f(44.0, 15.0, 65.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(44.0, -8.0, 75.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(44.0, -8.0, 85.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(44.0, 15.0, 85.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(44.0, 15.0, 75.0);
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 }
@@ -606,17 +572,23 @@ void addSculpture() {
 	// Turn on OpenGL texturing.
 	glEnable(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	glBindTexture(GL_TEXTURE_2D, texture[9]);
 	gluQuadricTexture(qobj, GL_TRUE);
 	glPushMatrix();
-	glTranslatef(-90.0, 3.0, 125.0);
+	glTranslatef(-60.0, 3.0, 195.0);
 	glRotatef(90.0, 1.0, 0.0, 0.0);
-	//gluSphere(qobj, 10.0, 20, 20);
-	gluCylinder(qobj, 5.0, 5.0, 20.0, 20.0, 20.0);
+	gluCylinder(qobj, 5.0, 5.0, 25.0, 25.0, 25.0);
 	glPopMatrix();
 
+	glBindTexture(GL_TEXTURE_2D, texture[9]);
+	gluQuadricTexture(qobj, GL_TRUE);
+	glPushMatrix();
+	glTranslatef(28.0, -11.0, 115.0);
+	gluSphere(qobj, 10.0, 20, 20);
+	glPopMatrix();
 	glDisable(GL_TEXTURE_2D);
 }
+
 
 void addPaintings() {
 	//road
@@ -653,6 +625,17 @@ void addPaintings() {
 	glTexCoord2f(1.0, 0.0); glVertex3f(-136.0, -7.0, 135.0);
 	glTexCoord2f(1.0, 1.0); glVertex3f(-136.0, 7.0, 135.0);
 	glTexCoord2f(0.0, 1.0); glVertex3f(-136.0, 7.0, 155.0);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+
+	// flower painting
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture[5]);
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f(-100.0, -7.0, 112.0);
+	glTexCoord2f(1.0, 0.0); glVertex3f(-80.0, -7.0, 112.0);
+	glTexCoord2f(1.0, 1.0); glVertex3f(-80.0, 7.0, 112.0);
+	glTexCoord2f(0.0, 1.0); glVertex3f(-100.0, 7.0, 112.0);
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 
@@ -705,6 +688,24 @@ void drawDoor() {
 
 }
 
+void drawFog() {
+	float fogColor[4] = { 0.5, 0.5, 0.5, 1.0 };
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Fog controls.
+	if (isFog) glEnable(GL_FOG);
+	else glDisable(GL_FOG);
+	glHint(GL_FOG_HINT, GL_NICEST);
+	glFogfv(GL_FOG_COLOR, fogColor);
+	glFogi(GL_FOG_MODE, fogMode);
+	glFogf(GL_FOG_START, fogStart);
+	glFogf(GL_FOG_END, fogEnd);
+	glFogf(GL_FOG_DENSITY, fogDensity);
+
+	glDisable(GL_FOG);
+}
+
 void drawAll() {
 
 	float matShine[] = { 50.0 };
@@ -736,12 +737,19 @@ void drawAll() {
 	addPhotographs();
 	addSculpture();
 	addPaintings();
-	glEnable(GL_AUTO_NORMAL);
-	drawRoof();
-	glDisable(GL_AUTO_NORMAL);
+	//teapotsculpt();
 
-	//drawRoof2();
+	if (roofEnable) {
+		glEnable(GL_AUTO_NORMAL);
+		drawRoof();
+		glDisable(GL_AUTO_NORMAL);
+	}
+
+
+
 	drawSun();
+
+
 }
 
 // The mouse callback routine.
@@ -820,6 +828,18 @@ void keyInput(unsigned char key, int x, int y)
 			break;
 		case '0':
 			overhead = !overhead;
+			glutPostRedisplay();
+			break;
+		case 'r':
+			roofEnable = !roofEnable;
+			glutPostRedisplay();
+			break;
+			break;
+		case 'f':
+			if (isFog == 0) { isFog = 1; fogMode = GL_LINEAR; }
+			else if (fogMode == GL_LINEAR) fogMode = GL_EXP;
+			else if (fogMode == GL_EXP) fogMode = GL_EXP2;
+			else isFog = 0;
 			glutPostRedisplay();
 			break;
 		case 27:
